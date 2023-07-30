@@ -1,0 +1,79 @@
+iscsi server add 3hdd and 1GB ram 1 core 
+iscsi client add 1hdd and 1gb ram 1 core
+
+---on both machine------
+
+systemctl stop firewalld
+systemctl disable firewalld
+vi /etc/selinux/config
+		----disable-----
+init 6
+
+on server machine------
+
+lsblk
+pvcreate /dev/sdb /dev/sdc /dev/sdd
+vgcreate vg_iscsi /dev/sdb /dev/sdc /dev/sdd
+lvcreate -n lv_iscsi-disk-01 -L 1G vg_iscsi   ------->>disk-01
+lvs
+lvcreate -n lv_iscsi-disk-02 -L 1G vg_iscsi   ------->disk-02
+yum install -y targetcli
+targetcli
+cd backstores/block
+create block1 /dev/mapper/vg_iscsi-lv_iscsi--disk--01
+cd ..
+ls
+cd ..
+cd iscsi
+create iqn.2023-07.cdac.acts.hpcsa.sbm:disk1
+cd iqn.2023-07.cdac.acts.hpcsa.sbm:disk1/
+ls
+
+then go to client machine------
+
+yum install iscsi-initiator-utils -y
+cat /etc/iscsi/initiatorname.iscsi
+-----InitiatorName=iqn.1994-05.com.redhat:6411b368cbf---------
+
+goto server machine------
+
+cd tpg1/acls			---------(/iscsi/iqn.20...csa.sbm:disk1> cd tpg1/acls)--------
+create iqn.1994-05.com.redhat:6411b368cbf
+		-----Created Node ACL for iqn.1994-05.com.redhat:6411b368cbf----
+ls
+cd ..
+cd luns
+ls
+cd /
+ls
+exit
+systemctl restart target
+systemctl status target
+
+
+on client machine------
+
+systemctl start iscsi
+iscsiadm -m discovery -t st -p 192.168.113.172 --login
+lsblk
+
+iscsiadm -m node -U all   -----if client not add hdd then run the cmd for logout-----
+
+fdisk /dev/sdb
+    -> press n
+    -> press p
+    -> press enter
+    -> press enter
+    -> press w
+	
+mkfs.ext4 /dev/sdb1
+mkdir /mnt/iscsilab
+mount /dev/sdb1 /mnt/iscsilab/
+df -h
+cd /mnt/iscsilab/
+iscsiadm -m session
+lsblk
+dd if=/dev/zero of=file.test bs=1024 count=520040
+lsblk
+df -Th
+--(/dev/sdb1               ext4       20G  552M   19G   3% /mnt/iscsilab)----
