@@ -1,0 +1,34 @@
+login --> storage --> pools --> add --> create pool  --> pool name (hpcsa) --> click on suggest layout --> select the disk --> click on create --> tick on confirm -->click on create pool 
+
+Go to accounts --> select users --> click on add --> write fullname and user (lab1) --> write password & confirm password (root) --> click on submit 
+
+Go to storage and select pools --> add dataset --> name (lab-dataset) --> submit --> on lab-dataset click on three dot and select edit permissions --> select apply user and apply group --> save
+
+Go to sharing select windows shares(SBM) --> add --> select the path --> submit --> enable services --> configure now --> in default ACL options (select RESTRICTED) --> continue
+
+Go to sharing and select Block shares (ISCSI) -->in Target global configuration just save and enable services --> go to portals --> add --> description (demo1) --> ip address select (0.0.0.0) --> port (3260) --> submit --> go to initiators group and click on add --> select allow all initiators --> save 
+--> go to targets and click on add --> target name (lab-target) --> portal group id (select demo1) --> initiator group id (select  all initiator allowed) --> submit
+go to extents and select add --> name(lab1) --> extent type select file --> select the path and write /mnt/hpcsa1/lab-dataset/win1 --> file size 2G --> submit
+
+go to associated targets and select add --> select target name(lab-target) --> Lun Id (0) --> extent (lab1) --> and  submit
+go to services --> stop and start iSCSI 
+
+search iscsi initiator and select  -->  target (192.168.15.199) --> quick connect --> done
+
+go to my pc and right click and select manage --> click on disk management --> right click on disk02 and initialize  --> right click on unallocated and select new sample volume --> next 
+
+add another disk
+,,,,,,,,,,,,,,,,,,,,,,,,,
+
+go to sharing select block shares (iSCSI) --> go to portals and add --> description (lab2) --> ip address select (0.0.0.0) --> port (3261) --> submit 
+--> initiator group and slect allow all initiators --> save
+--> go to targets and add --> target name (lab-target2) --> portal group id select (demo1) --> initator group select 1(all inititors allowed) --> submit
+go to extents and select add --> name(lab2) --> extent type select file --> select the path and write /mnt/hpcsa1/lab-dataset/win2 --> file size 3G --> submit
+
+go to associated targets and select add --> select target name(lab-target2) --> Lun Id (0) --> extent (lab2) --> and  submit
+go to services --> stop and start iSCSI 
+
+
+ 
+
+ 
