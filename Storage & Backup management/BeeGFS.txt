@@ -1,0 +1,136 @@
+http://www.beegfs.io/wiki/ManualInstallWalkThrough
+
+
+1. Download BeeGFS Repository:
+    To start with, we will download the BeeGFS repository to our system:
+
+    yum install nano wget
+    wget --no-check-certificate -O /etc/yum.repos.d/beegfs.repo https://www.beegfs.io/release/beegfs_7.2/dists/beegfs-rhel7.repo
+    
+
+    Please replace "7.2" with the current BeeGFS version, and "rhel7" with your OS version.
+
+2. Install BeeGFS Packages on server client:
+    Install BeeGFS packages with the following commands:
+
+    
+    yum install beegfs-utils beegfs-client beegfs-meta beegfs-storage beegfs-mgmtd
+ 
+	
+
+3. Configure BeeGFS:
+    Now, we will configure the metadata server (MDS), storage server (SS), and client. You will need to replace `<MDS IP>`, `<SS IP>`, and `<client IP>` with your server vm IPs.
+        mkdir -p /mnt/beegfs/meta && mkdir -p /mnt/beegfs/storage && mkdir -p /mnt/beegfs/beegfs_mgmtd
+	/opt/beegfs/sbin/beegfs-setup-mgmtd -p /mnt/beegfs/beegfs_mgmtd
+	
+	
+	 
+	open this file nano /etc/beegfs/beegfs-client.conf
+
+	add entry --> sysMgmtdHost = "your server VM IP"
+	
+	systemctl start beegfs-mgmtd &&     systemctl enable beegfs-mgmtd &&     systemctl status beegfs-mgmtd
+
+	
+	 
+    On the metadata server:
+
+ 
+    /opt/beegfs/sbin/beegfs-setup-meta -p /mnt/beegfs/meta -s 1 -m <MDS IP>
+    
+    systemctl start beegfs-meta && systemctl enable beegfs-meta && systemctl status beegfs-meta
+    
+
+    On the storage server:
+
+    
+    /opt/beegfs/sbin/beegfs-setup-storage -p /mnt/beegfs/storage -s 2 -i 1 -m <MDS IP>
+    
+    systemctl start beegfs-storage && systemctl enable beegfs-storage && systemctl status beegfs-storage
+
+
+    On the client machine:
+    yum install nano wget
+    
+    wget --no-check-certificate -O /etc/yum.repos.d/beegfs.repo https://www.beegfs.io/release/beegfs_7.2/dists/beegfs-rhel7.repo   
+
+    yum install -y kernel-devel beegfs-utils beegfs-client beegfs-mgmtd
+	
+	 rm /lib/modules/3.10.0-1160.el7.x86_64/build
+	 ln -s /usr/src/kernels/3.10.0-1160.92.1.el7.x86_64/ /lib/modules/3.10.0-1160.el7.x86_64/build
+	 /etc/init.d/beegfs-client rebuild
+    
+    /opt/beegfs/sbin/beegfs-setup-client -m <MDS IP> 
+	
+    mkdir /mnt/beegfs
+    
+    systemctl start beegfs-client
+    systemctl enable beegfs-client
+	
+
+4. Start BeeGFS Services:
+    On the metadata server and storage server:
+
+    
+  
+
+    systemctl start beegfs-storage
+    systemctl enable beegfs-storage
+    
+
+    On the client:
+
+    nano /etc/beegfs/beegfs-client.conf
+    systemctl start beegfs-client
+    systemctl enable beegfs-client
+    
+
+5. Check Your Installation:
+    After starting BeeGFS, you can check your installation using the following command on any of the servers:
+
+
+
+   11  yum install nano wget
+   12  clear
+   13  systemctl stop firewalld &&  systemctl disable firewalld
+   14   wget --no-check-certificate -O /etc/yum.repos.d/beegfs.repo https://www.beegfs.io/release/beegfs_7.2/dists/beegfs-rhel7.repo
+   15      cat /etc/yum.repos.d/beegfs.repo
+   16  clear
+   17  yum install beegfs-utils beegfs-client beegfs-meta beegfs-storage beegfs-mgmtd
+   18          mkdir -p /mnt/beegfs/meta && mkdir -p /mnt/beegfs/storage && mkdir -p /mnt/beegfs/beegfs_mgmtd
+   19  df -h
+   20  clear
+   21  /opt/beegfs/sbin/beegfs-setup-mgmtd -p /mnt/beegfs/beegfs_mgmtd
+   22  cat  /etc/beegfs/beegfs-mgmtd.conf
+   23  clear
+   24  nano /etc/beegfs/beegfs-mgmtd.conf
+   25  nano /etc/beegfs/beegfs-client
+   26  nano /etc/beegfs/beegfs-client.conf
+   27  systemctl start beegfs-mgmtd &&     systemctl enable beegfs-mgmtd &&     systemctl status beegfs-mgmtd
+   28  /opt/beegfs/sbin/beegfs-setup-meta -p /mnt/beegfs/meta -s 1 -m 192.168.100.154
+   29  nano /etc/beegfs/beegfs-m
+   30  nano /etc/beegfs/beegfs-meta.conf
+   31  systemctl start beegfs-meta && systemctl enable beegfs-meta && systemctl status beegfs-meta
+   32   /opt/beegfs/sbin/beegfs-setup-storage -p /mnt/beegfs/storage -s 2 -i 1 -m 192.168.100.154
+   33    systemctl start beegfs-storage && systemctl enable beegfs-storage && systemctl status beegfs-storage
+   34  clear
+   35  beegfs-check-servers
+   36  beegfs-ctl --listnodes --nodetype=storage
+   37  beegfs-ctl --listnodes --nodetype=storage --nicdetails
+   38  history
+   
+   
+   
+   
+   Client 
+   
+   
+   
+      31  yum install -y kernel-devel beegfs-utils beegfs-client beegfs-mgmtd
+   32  /opt/beegfs/sbin/beegfs-setup-client -m 192.168.100.154
+   33  nano /etc/beegfs/beegfs-mounts.conf
+   34  cd /mnt/beegfs/
+   35  ls
+   36  systemctl start beegfs-client
+   37  journalctl -xe
+   38  history
