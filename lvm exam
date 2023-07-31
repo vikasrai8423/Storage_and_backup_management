@@ -1,0 +1,266 @@
+:\Users\user>ssh root@192.168.93.129
+root@192.168.93.129's password:
+Last login: Mon Jul 31 22:06:13 2023 from 192.168.93.1
+[root@localhost ~]#script lvm.txt
+Script started on Monday 31 July 2023 10:06:38 PM IST
+[root@localhost ~]# lsblk
+NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda               8:0    0   20G  0 disk
+├─sda1            8:1    0    1G  0 part /boot
+└─sda2            8:2    0   19G  0 part
+  ├─centos-root 253:0    0   17G  0 lvm  /
+  └─centos-swap 253:1    0    2G  0 lvm  [SWAP]
+sdb               8:16   0   20G  0 disk
+sdc               8:32   0   20G  0 disk
+sdd               8:48   0   20G  0 disk
+sr0              11:0    1  973M  0 rom
+[root@localhost ~]# pvcreate /dev/sdb /dev/sdc
+  Physical volume "/dev/sdb" successfully created.
+  Physical volume "/dev/sdc" successfully created.
+[root@localhost ~]# vgcreate hpcsa /dev/sdb /dev/sdc
+  Volume group "hpcsa" successfully created
+[root@localhost ~]# vgdisplay
+  --- Volume group ---
+  VG Name               centos
+  System ID
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  3
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                2
+  Open LV               2
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               <19.00 GiB
+  PE Size               4.00 MiB
+  Total PE              4863
+  Alloc PE / Size       4863 / <19.00 GiB
+  Free  PE / Size       0 / 0
+  VG UUID               l9ikUh-QLUp-8ljK-fCed-87tG-2H3a-9ABodM
+
+  --- Volume group ---
+  VG Name               hpcsa
+  System ID
+  Format                lvm2
+  Metadata Areas        2
+  Metadata Sequence No  1
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                0
+  Open LV               0
+  Max PV                0
+  Cur PV                2
+  Act PV                2
+  VG Size               39.99 GiB
+  PE Size               4.00 MiB
+  Total PE              10238
+  Alloc PE / Size       0 / 0
+  Free  PE / Size       10238 / 39.99 GiB
+  VG UUID               36ZbBb-e1iB-Pp5U-EROw-cjV0-a6g8-wSWdRQ
+
+[root@localhost ~]# lvcreate -n h1 --size 1G hpcsa
+  Logical volume "h1" created.
+[root@localhost ~]# lvcreate -n h2 --size 1G hpcsa
+  Logical volume "h2" created.
+[root@localhost ~]# lvcreate -n h3 --size 1G hpcsa
+  Logical volume "h3" created.
+[root@localhost ~]# lvs
+  LV   VG     Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  root centos -wi-ao---- <17.00g
+  swap centos -wi-ao----   2.00g
+  h1   hpcsa  -wi-a-----   1.00g
+  h2   hpcsa  -wi-a-----   1.00g
+  h3   hpcsa  -wi-a-----   1.00g
+[root@localhost ~]# mkfs.ext4 /dev/mapper/hpcsa-h1
+mke2fs 1.42.9 (28-Dec-2013)
+Filesystem label=
+OS type: Linux
+Block size=4096 (log=2)
+Fragment size=4096 (log=2)
+Stride=0 blocks, Stripe width=0 blocks
+65536 inodes, 262144 blocks
+13107 blocks (5.00%) reserved for the super user
+First data block=0
+Maximum filesystem blocks=268435456
+8 block groups
+32768 blocks per group, 32768 fragments per group
+8192 inodes per group
+Superblock backups stored on blocks:
+        32768, 98304, 163840, 229376
+
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (8192 blocks): done
+Writing superblocks and filesystem accounting information: done
+
+[root@localhost ~]# mkfs.ext4 /dev/mapper/hpcsa-h2
+mke2fs 1.42.9 (28-Dec-2013)
+Filesystem label=
+OS type: Linux
+Block size=4096 (log=2)
+Fragment size=4096 (log=2)
+Stride=0 blocks, Stripe width=0 blocks
+65536 inodes, 262144 blocks
+13107 blocks (5.00%) reserved for the super user
+First data block=0
+Maximum filesystem blocks=268435456
+8 block groups
+32768 blocks per group, 32768 fragments per group
+8192 inodes per group
+Superblock backups stored on blocks:
+        32768, 98304, 163840, 229376
+
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (8192 blocks): done
+Writing superblocks and filesystem accounting information: done
+
+[root@localhost ~]# mkfs.ext4 /dev/mapper/hpcsa-h3
+mke2fs 1.42.9 (28-Dec-2013)
+Filesystem label=
+OS type: Linux
+Block size=4096 (log=2)
+Fragment size=4096 (log=2)
+Stride=0 blocks, Stripe width=0 blocks
+65536 inodes, 262144 blocks
+13107 blocks (5.00%) reserved for the super user
+First data block=0
+Maximum filesystem blocks=268435456
+8 block groups
+32768 blocks per group, 32768 fragments per group
+8192 inodes per group
+Superblock backups stored on blocks:
+        32768, 98304, 163840, 229376
+
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (8192 blocks): done
+Writing superblocks and filesystem accounting information: done
+
+[root@localhost ~]# mkdir data
+[root@localhost ~]# mkdir scratch
+[root@localhost ~]# mkdir app
+[root@localhost ~]# mount /dev/mapper/hpcsa-h1
+mount: can't find /dev/mapper/hpcsa-h1 in /etc/fstab
+[root@localhost ~]# mount /dev/mapper/hpcsa-h1 data/
+[root@localhost ~]# mount /dev/mapper/hpcsa-h2 scratch/
+[root@localhost ~]# mount /dev/mapper/hpcsa-h3 app/
+[root@localhost ~]# lsblk
+NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda               8:0    0   20G  0 disk
+├─sda1            8:1    0    1G  0 part /boot
+└─sda2            8:2    0   19G  0 part
+  ├─centos-root 253:0    0   17G  0 lvm  /
+  └─centos-swap 253:1    0    2G  0 lvm  [SWAP]
+sdb               8:16   0   20G  0 disk
+├─hpcsa-h1      253:2    0    1G  0 lvm  /root/data
+├─hpcsa-h2      253:3    0    1G  0 lvm  /root/scratch
+└─hpcsa-h3      253:4    0    1G  0 lvm  /root/app
+sdc               8:32   0   20G  0 disk
+sdd               8:48   0   20G  0 disk
+sr0              11:0    1  973M  0 rom
+[root@localhost ~]# exit
+
+Script done on Monday 31 July 2023 10:10:49 PM IST
+[root@localhost ~]#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
